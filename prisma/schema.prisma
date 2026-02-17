@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// `sessions` moved to Redis. Table removed.
+
+model users {
+  id                Int        @id @default(autoincrement())
+  first_name        String
+  last_name         String
+  email             String     @unique
+  password          String
+  status            String     @default("pending")
+  role              String     @default("user")
+  email_verified_at DateTime?  @db.Timestamp(6)
+  verify_token      String?
+  verify_expires_at DateTime?  @db.Timestamp(6)
+  reset_token       String?    @unique
+  reset_expires_at  DateTime?  @db.Timestamp(6)
+  last_login_at     DateTime?  @db.Timestamp(6)
+  created_at        DateTime   @default(now()) @db.Timestamp(6)
+  updated_at        DateTime   @default(now()) @db.Timestamp(6)
+  // sessions removed — now stored in Redis
+  api_logs          api_logs[]
+}
+
+model api_logs {
+  id          Int      @id @default(autoincrement())
+  timestamp   DateTime @default(now()) @db.Timestamp(6)
+  ip          String?
+  method      String
+  path        String
+  status      Int
+  duration_ms Int?
+  user_id     Int?
+  body        Json?
+
+  users       users?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+}

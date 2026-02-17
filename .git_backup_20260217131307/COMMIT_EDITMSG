@@ -1,0 +1,1 @@
+feat: add session deletion command to Redis AOF for improved session management
