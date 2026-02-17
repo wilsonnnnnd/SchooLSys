@@ -33,6 +33,8 @@ model users {
   as_student_teacher_relations_as_teacher student_teachers[] @relation("StudentTeacher_teacher")
   // Courses taught by this user (when user is a teacher)
   courses_taught                          courses[]          @relation("Course_teacher")
+  // Enrolments for this user when they are a student
+  enrolments                              enrolments[]       @relation("Enrolment_student")
 }
 
 model api_logs {
@@ -96,5 +98,26 @@ model courses {
 
   teacher users? @relation("Course_teacher", fields: [teacher_id], references: [id], onDelete: SetNull)
 
+  // Enrolments for this course
+  enrolments enrolments[] @relation("Enrolment_course")
+
   @@index([teacher_id])
+}
+
+// Enrollment table mapping students to courses
+model enrolments {
+  id         Int      @id @default(autoincrement())
+  student_id Int
+  course_id  Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  deleted     Boolean  @default(false)
+  enabled    Boolean  @default(true)
+
+  student users   @relation("Enrolment_student", fields: [student_id], references: [id], onDelete: Cascade)
+  course  courses @relation("Enrolment_course", fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, course_id])
+  @@index([student_id])
+  @@index([course_id])
 }
