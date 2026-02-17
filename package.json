@@ -12,7 +12,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^6.19.2",
     "axios": "^1.13.5",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
@@ -26,6 +25,7 @@
     "resend": "^6.9.2"
   },
   "devDependencies": {
+    "@prisma/client": "^6.19.2",
     "nodemon": "^3.1.11",
     "prisma": "^6.19.2"
   }

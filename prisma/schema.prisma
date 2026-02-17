@@ -7,26 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// `sessions` moved to Redis. Table removed.
-
 model users {
-  id                Int        @id @default(autoincrement())
-  first_name        String
-  last_name         String
-  email             String     @unique
-  password          String
-  status            String     @default("pending")
-  role              String     @default("student")
-  email_verified_at DateTime?  @db.Timestamp(6)
-  verify_token      String?
-  verify_expires_at DateTime?  @db.Timestamp(6)
-  reset_token       String?    @unique
-  reset_expires_at  DateTime?  @db.Timestamp(6)
-  last_login_at     DateTime?  @db.Timestamp(6)
-  created_at        DateTime   @default(now()) @db.Timestamp(6)
-  updated_at        DateTime   @default(now()) @db.Timestamp(6)
-  // sessions removed — now stored in Redis
-  api_logs          api_logs[]
+  id                                      Int                @id @default(autoincrement())
+  first_name                              String
+  last_name                               String
+  email                                   String             @unique
+  password                                String
+  status                                  String             @default("pending")
+  role                                    String             @default("student")
+  email_verified_at                       DateTime?          @db.Timestamp(6)
+  verify_token                            String?
+  verify_expires_at                       DateTime?          @db.Timestamp(6)
+  last_login_at                           DateTime?          @db.Timestamp(6)
+  created_at                              DateTime           @default(now()) @db.Timestamp(6)
+  updated_at                              DateTime           @updatedAt @db.Timestamp(6)
+  deleted                                 Boolean            @default(false)
+  enabled                                 Boolean            @default(true)
+  reset_expires_at                        DateTime?          @db.Timestamp(6)
+  reset_token                             String?            @unique
+  api_logs                                api_logs[]
+  as_parent_relations                     student_parents[]  @relation("StudentParent_parent")
+  as_student_relations                    student_parents[]  @relation("StudentParent_student")
+  // Relations to student_teachers join table
+  as_student_teacher_relations_as_student student_teachers[] @relation("StudentTeacher_student")
+  as_student_teacher_relations_as_teacher student_teachers[] @relation("StudentTeacher_teacher")
+  // Courses taught by this user (when user is a teacher)
+  courses_taught                          courses[]          @relation("Course_teacher")
 }
 
 model api_logs {
@@ -39,6 +45,56 @@ model api_logs {
   duration_ms Int?
   user_id     Int?
   body        Json?
+  users       users?   @relation(fields: [user_id], references: [id])
+}
 
-  users       users?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+model student_parents {
+  id         Int      @id @default(autoincrement())
+  student_id Int
+  parent_id  Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  deleted     Boolean  @default(false)
+  enabled    Boolean  @default(true)
+  parent     users    @relation("StudentParent_parent", fields: [parent_id], references: [id], onDelete: Cascade)
+  student    users    @relation("StudentParent_student", fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, parent_id])
+  @@index([student_id])
+  @@index([parent_id])
+}
+
+// Relationship table mapping students to their teacher(s)
+model student_teachers {
+  id         Int      @id @default(autoincrement())
+  student_id Int
+  teacher_id Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  deleted     Boolean  @default(false)
+  enabled    Boolean  @default(true)
+
+  student users @relation("StudentTeacher_student", fields: [student_id], references: [id], onDelete: Cascade)
+  teacher users @relation("StudentTeacher_teacher", fields: [teacher_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, teacher_id])
+  @@index([student_id])
+  @@index([teacher_id])
+}
+
+// Courses table
+model courses {
+  id          Int      @id @default(autoincrement())
+  name        String
+  code        String?  @unique
+  description String?
+  teacher_id  Int?
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @updatedAt @db.Timestamp(6)
+  deleted     Boolean  @default(false)
+  enabled     Boolean  @default(true)
+
+  teacher users? @relation("Course_teacher", fields: [teacher_id], references: [id], onDelete: SetNull)
+
+  @@index([teacher_id])
 }

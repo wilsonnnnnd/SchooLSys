@@ -18,7 +18,7 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
-    "role" TEXT NOT NULL DEFAULT 'student',
+    "role" TEXT NOT NULL DEFAULT 'user',
     "email_verified_at" TIMESTAMP(6),
     "verify_token" TEXT,
     "verify_expires_at" TIMESTAMP(6),
