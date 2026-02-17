@@ -111,3 +111,28 @@ This project contains a dedicated Postman guide at [Postman-Testing.md](Postman-
 - 401/Invalid token: ensure `Authorization` header is `Bearer {{accessToken}}` and token not expired.
 - 403/Forbidden: check user `role` and ownership rules.
 - Migration/connect errors: confirm `DATABASE_URL` and DB accessibility.
+
+**Architecture**
+
+Below is the service architecture (Mermaid). The source diagram is at `diagrams/architecture.mmd`.
+
+```mermaid
+%% Simplified Mermaid architecture diagram for SchooLSys
+flowchart LR
+  server["server.js\n(start + workers)"] --> app["app.js\n(express app)"]
+
+  app --> middleware["Middleware\n(auth, cache, metrics, logging, error)"]
+  app --> api["API Routes\n(generic)"]
+
+  api --> controllers["Controllers"]
+  controllers --> services["Services: auth, users, email, tokens"]
+
+  services --> postgres[(Postgres - Prisma)]
+  services --> redis[(Redis - cache & sessions)]
+  services --> mailer[(Mailer / SMTP)]
+
+  server --> workers["Background workers\n(e.g. logWorker)"]
+
+  classDef infra fill:#f9f9f9,stroke:#333,stroke-width:1px;
+  class postgres,redis,mailer infra;
+```
