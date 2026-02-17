@@ -50,7 +50,7 @@ exports.create = async ({
     );
     const passwordHash = await require("bcrypt").hash(password, 10);
 
-    const finalRole = role && isValidRole(role) ? role : ROLES.user;
+    const finalRole = role && isValidRole(role) ? role : ROLES.student;
     const created = await prisma.users.create({
         data: {
             first_name: first_name || "",
@@ -93,7 +93,7 @@ exports.createWithVerification = async ({
     );
     const passwordHash = await require("bcrypt").hash(password, 10);
 
-    const finalRole = role && isValidRole(role) ? role : ROLES.user;
+    const finalRole = role && isValidRole(role) ? role : ROLES.student;
 
     const jwt = require("jsonwebtoken");
     const JWT_SECRET = process.env.JWT_SECRET;

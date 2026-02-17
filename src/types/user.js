@@ -4,13 +4,16 @@
  */
 
 /**
- * @typedef {'admin'|'user'} UserRole
+ * @typedef {'student'|'parent'|'teacher'|'director'|'admin'} UserRole
  */
 
 /** Role constants */
 const ROLES = Object.freeze({
+  student: 'student',
+  parent: 'parent',
+  teacher: 'teacher',
+  director: 'director',
   admin: 'admin',
-  user: 'user',
 });
 
 /**
@@ -19,7 +22,7 @@ const ROLES = Object.freeze({
  * @returns {v is UserRole}
  */
 function isValidRole(v) {
-  return v === ROLES.admin || v === ROLES.user;
+  return Object.values(ROLES).includes(v);
 }
 
 module.exports = { ROLES, isValidRole };

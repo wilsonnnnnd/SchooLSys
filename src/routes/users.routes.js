@@ -23,7 +23,7 @@ router.post(
 	requireRole("admin"),
 	body("email").isEmail().withMessage("invalid email"),
 	body("password").isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
-	body("role").optional().isIn([ROLES.admin, ROLES.user]).withMessage("invalid role"),
+	body("role").optional().isIn(Object.values(ROLES)).withMessage("invalid role"),
 	handleValidation,
 	UsersController.create
 );
@@ -33,7 +33,7 @@ router.put(
 	decodeIdParam,
 	param("id").isInt().toInt(),
 	body("email").optional().isEmail().withMessage("invalid email"),
-	body("role").optional().isIn([ROLES.admin, ROLES.user]).withMessage("invalid role"),
+	body("role").optional().isIn(Object.values(ROLES)).withMessage("invalid role"),
 	handleValidation,
 	requireRoleOrOwner("admin"),
 	UsersController.update
